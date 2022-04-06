@@ -4,7 +4,7 @@ This script sets up a Raspberry Pi Cluster utilizing the [Cluster Hat](https://c
 
 https://clusterctrl.com/setup-software
 
-## Pred th SDs
+## Pred the SDs
 
 Download image for the Cluster control and 4 nodes from:
 https://clusterctrl.com/setup-software (or https://dist2.8086.net/clusterctrl/testing/ for new versions)
@@ -38,5 +38,7 @@ sudo reboot
 ```
 
 ## Setup Bramble
+```bash
 sudo true
 curl https://raw.githubusercontent.com/rodneyshupe/RPi_Bramble/master/install.sh | bash
+```
