@@ -8,32 +8,27 @@ cat ~/.ssh/id_rsa.pub
 
 grep -qF '172.19.181.254 ' /etc/hosts || echo "172.19.181.254  main cnat controller" | sudo tee -a /etc/hosts >/dev/null
 
-for node in 1 2 3 4; do 
+for node in $(seq 1 $(/usr/sbin/clusterctrl maxpi)); do 
     grep -qF "172.19.181.$node " /etc/hosts || echo "172.19.181.$node    p$node" | sudo tee -a /etc/hosts >/dev/null
 done
 
 # create SSH config file
-cat << EOF > ~/.ssh/config
-Host p1
-    Hostname 172.19.181.1
-    User pi
-    StrictHostKeyChecking=accept-new
-Host p2
-    Hostname 172.19.181.2
-    User pi
-    StrictHostKeyChecking=accept-new
-Host p3
-    Hostname 172.19.181.3
-    User pi
-    StrictHostKeyChecking=accept-new
-Host p4
-    Hostname 172.19.181.4
+for node in $(seq 1 $(/usr/sbin/clusterctrl maxpi)); do 
+    grep -qF "172.19.181.$node " /etc/hosts || echo "172.19.181.$node    p$node" | sudo tee -a /etc/hosts >/dev/null
+done
+
+echo >~/.ssh/config
+for node in $(seq 1 $(/usr/sbin/clusterctrl maxpi)); do 
+  cat << EOF >> ~/.ssh/config
+Host p$node
+    Hostname 172.19.181.$node
     User pi
     StrictHostKeyChecking=accept-new
 EOF
+done
 
 # Copy key to each node
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
     ssh-copy-id -i ~/.ssh/id_rsa.pub $host
 done
 
@@ -61,7 +56,7 @@ if LOCALE_LINE="$(grep "^$LOCALE " /usr/share/i18n/SUPPORTED)"; then
 fi
 
 # Loop through hosts and set timezone.
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   echo "Adjusting $host.local..."
   echo "    Timezone..."
   ssh pi@$host.local 'rm /etc/localtime 2>/dev/null; echo "America/Vancouver" | sudo tee /etc/timezone >/dev/null && sudo dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1' >/dev/null
@@ -95,7 +90,7 @@ sudo apt-get install -y nfs-kernel-server
 
 [ $(grep -q "/media/Storage" /etc/exports; echo $?) -ne 0 ] && echo "/media/Storage 172.19.181.0/24(rw,sync,no_root_squash,no_subtree_check)" | sudo tee -a /etc/exports
 
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   echo "Install NFS client on $host.local..."
   ssh pi@$host.local 'sudo apt-get install -y nfs-common' >>/dev/null
   echo "Setup mount point..."
@@ -105,7 +100,7 @@ done
 # Install Docker
 curl -sSL get.docker.com | sh && sudo usermod pi -aG docker && sudo usermod $USER -aG docker
 
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   echo "Install docker on $host.local..."
   ssh pi@$host.local 'curl -sSL get.docker.com | sh && sudo usermod pi -aG docker'
 done
@@ -115,7 +110,7 @@ sudo iptables -P FORWARD ACCEPT
 sudo docker swarm init --advertise-addr 172.19.181.254:2377 --listen-addr 172.19.181.254:2377
 
 worker_join_cmd="$(docker swarm join-token worker | grep 'docker swarm join' | sed 's/^[ ]*//g')"
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   echo "Add $host.local to the docker swarm..."
   ssh pi@$host.local "$worker_join_cmd"
 done
@@ -124,7 +119,7 @@ docker node list
 
 docker node update --label-add type=3B+ bramble
 
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   docker node update --label-add type=zero $host
 done
 

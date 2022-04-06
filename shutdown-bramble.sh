@@ -16,12 +16,12 @@ function waitfor() {
   done
 }
 
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   echo "Shutting down $host.local..."
   ssh pi@$host.local 'sudo shutdown now' >/dev/null
 done
 
-for host in p1 p2 p3 p4; do 
+for host in $(seq --format='p%g' 1 $(/usr/sbin/clusterctrl maxpi)); do 
   waitfor $host.local
 done
 
