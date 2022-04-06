@@ -69,9 +69,8 @@ done
 
 mkdir -p /home/milliways/.scripts
 
-cat << EOF
+curl https://raw.githubusercontent.com/rodneyshupe/RPi_Bramble/main/shutdown-bramble.sh --output /home/milliways/.scripts/shutdown-bramble.sh
 
-EOF >/home/milliways/.scripts/shutdown-bramble.sh
 
 # Setup Shared Storage
 sudo mkdir -p /media/storage
@@ -115,5 +114,3 @@ for host in p1 p2 p3 p4; do
 done
 
 docker node ls
-
-
