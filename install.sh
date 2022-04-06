@@ -6,6 +6,12 @@ mkdir -p ~/.ssh
 ssh-keygen -t rsa -b 4096
 cat ~/.ssh/id_rsa.pub
 
+grep -qF '172.19.181.254 ' /etc/hosts || echo "172.19.181.254  main cnat controller" | sudo tee -a /etc/hosts >/dev/null
+
+for node in 1 2 3 4; do 
+    grep -qF "172.19.181.$node " /etc/hosts || echo "172.19.181.$node    p$node" | sudo tee -a /etc/hosts >/dev/null
+done
+
 # create SSH config file
 cat << EOF > ~/.ssh/config
 Host p1
