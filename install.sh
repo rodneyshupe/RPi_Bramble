@@ -113,4 +113,12 @@ for host in p1 p2 p3 p4; do
   ssh pi@$host.local "$worker_join_cmd"
 done
 
-docker node ls
+docker node list
+
+docker node update --label-add type=3B+ bramble
+
+for host in p1 p2 p3 p4; do 
+  docker node update --label-add type=zero $host
+done
+
+docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
