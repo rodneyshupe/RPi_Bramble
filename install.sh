@@ -73,10 +73,11 @@ for host in p1 p2 p3 p4; do
   ssh pi@$host.local 'LOCALE="en_US.UTF-8"; if LOCALE_LINE="$(grep "^$LOCALE " /usr/share/i18n/SUPPORTED)"; then ENCODING="$(echo $LOCALE_LINE | cut -f2 -d " ")"; echo "$LOCALE $ENCODING" |sudo tee /etc/locale.gen >/dev/null; sudo sed -i "s/^\s*LANG=\S*/LANG=$LOCALE/" /etc/default/locale; sudo dpkg-reconfigure -f noninteractive locales >/dev/null 2>&1;fi' >/dev/null
 done
 
-mkdir -p /home/milliways/.scripts
+mkdir -p ~/.scripts
 
-curl https://raw.githubusercontent.com/rodneyshupe/RPi_Bramble/main/shutdown-bramble.sh --output /home/milliways/.scripts/shutdown-bramble.sh
-
+curl -sSL https://raw.githubusercontent.com/rodneyshupe/RPi_Bramble/main/shutdown-bramble.sh --output ~/.scripts/shutdown-bramble.sh
+chmod +x ~/.scripts/shutdown-bramble.sh
+sudo cp ~/.scripts/shutdown-bramble.sh /usr/local/bin/shutdown-bramble
 
 # Setup Shared Storage
 sudo mkdir -p /media/storage
