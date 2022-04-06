@@ -129,3 +129,8 @@ for host in p1 p2 p3 p4; do
 done
 
 docker node ls -q | xargs docker node inspect -f '{{ .ID }} [{{ .Description.Hostname }}]: {{ .Spec.Labels }}'
+
+mkdir -p docker/portainer
+curl -sSL https://raw.githubusercontent.com/rodneyshupe/RPi_Bramble/main/docker/portainer/docker-compose.yml --output docker/portainer/docker-compose/
+
+docker-compose up -d
